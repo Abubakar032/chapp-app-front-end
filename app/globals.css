@@ -8,3 +8,12 @@ body{
   background-size: cover;
 
 }
+
+
+.AtScrollHide::-webkit-scrollbar {
+  display: none !important;
+}
+.AtScrollHide {
+  -ms-overflow-style: none !important; /* IE and Edge */
+  scrollbar-width: none !important; /* Firefox */
+}
