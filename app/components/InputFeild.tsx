@@ -1,17 +1,31 @@
 import React from "react";
 
-const InputFeild = ({
+interface InputFeildProps {
+  type?: string;
+  className?: string;
+  placeholder?: string;
+  onchange?: React.ChangeEventHandler<HTMLInputElement>;
+  value?: string | number;
+  disabled?: boolean;
+}
+
+const InputFeild: React.FC<InputFeildProps> = ({
   type,
   className,
   placeholder,
-  onchange
-}: any) => {
+  onchange,
+  value,
+  disabled
+
+}) => {
   return (
     <input
       type={type}
       className={className}
       placeholder={placeholder}
       onChange={onchange}
+      value={value}
+      disabled={disabled}
     />
   );
 };
