@@ -85,7 +85,7 @@ const ProfileUpdate = ({ setProfileUpdate, Profile }: any) => {
                 ? profileImage
                 : formData.image
                 ? formData.image
-                : "/assets/images/default_profile.png"
+                : "/assets/images/avatar_icon.png"
             }
             alt="Profile"
             className="w-32 h-32 rounded-full object-cover border-2 border-gray-300"
