@@ -37,6 +37,7 @@ const UserSideBar: React.FC<UserSideBarProps> = ({
 }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [logout, setLogout] = useState(false);
+  const [value, setValue] = useState(""); // Added state for input value
   const hideMenuTimeout = useRef<NodeJS.Timeout | null>(null);
   const router = useRouter();
 
@@ -91,7 +92,7 @@ const UserSideBar: React.FC<UserSideBarProps> = ({
                 onClick={() => {
                   setProfileUpdate?.(1);
                   setShowMenu(false);
-                  setSelectedUser({})
+                  setSelectedUser({});
                 }}
                 className="w-full text-left px-4 py-2 hover:bg-gray-100 cursor-pointer"
               >
@@ -115,59 +116,75 @@ const UserSideBar: React.FC<UserSideBarProps> = ({
         type="text"
         className="w-full py-2 px-3 my-3 mt-5 border-2 border-gray-500 rounded-2xl focus:border-gray-500 focus:outline-none transition-all text-gray-300"
         placeholder="Search user..."
+        onchange={(e) => {
+          setValue(e.target.value);
+        }}
       />
 
-      <ul className="space-y-2 overflow-y-auto AtScrollHide  py-4 px-1 scrollbar-thin scrollbar-thumb-gray-700">
-        {userList?.users.map((user: any, index: any) => {
-          return (
-            <li
-              key={index}
-              onClick={() => {
-                setSelectedUser(user);
-              }}
-              className={`flex items-center justify-between gap-2 p-2 hover:bg-white/30 rounded-2xl cursor-pointer ${
-                unSeenMessages?.[user._id] ? "bg-white/5" : ""
-              } ${
-                user?._id === selectedUser?._id
-                  ? "bg-white/30 border-2 border-gray-400"
-                  : ""
-              }`}
-            >
-              <div className="flex w-full">
-                <Image
-                  src={
-                    user?.profilImage
-                      ? user?.profilImage
-                      : `/assets/images/avatar_icon.png`
-                  }
-                  width={30}
-                  height={30}
-                  alt="avatar"
-                  className="rounded-full w-8 h-8"
-                />
-                <div className="ml-2">
-                  <p className="text-sm font-medium">{user.fullName}</p>
-                  <p
-                    className={`text-xs font-bold ${
-                      onlineUsers.includes(user._id)
-                        ? "text-green-500"
-                        : "text-gray-300"
-                    }`}
-                  >
-                    {onlineUsers.includes(user._id)
-                      ? "🟢 online"
-                      : "⚪ offline"}
-                  </p>
+      <ul className="space-y-2 overflow-y-auto AtScrollHide py-4 px-1 scrollbar-thin scrollbar-thumb-gray-700">
+        {userList?.users.filter(
+          (user: any) =>
+            user.fullName.toLowerCase().includes(value.toLowerCase()) ||
+            user.email?.toLowerCase().includes(value.toLowerCase())
+        ).length === 0 ? (
+          <li className="text-center text-gray-300 py-8">No user found</li>
+        ) : (
+          userList?.users
+            .filter(
+              (user: any) =>
+                user.fullName.toLowerCase().includes(value.toLowerCase()) ||
+                user.email?.toLowerCase().includes(value.toLowerCase())
+            )
+            .map((user: any, index: any) => (
+              <li
+                key={index}
+                onClick={() => {
+                  setSelectedUser(user);
+                  setProfileUpdate(0)
+                }}
+                className={`flex items-center justify-between gap-2 p-2 hover:bg-white/30 rounded-2xl cursor-pointer ${
+                  unSeenMessages?.[user._id] ? "bg-white/5" : ""
+                } ${
+                  user?._id === selectedUser?._id
+                    ? "bg-white/30 border-2 border-gray-400"
+                    : ""
+                }`}
+              >
+                <div className="flex w-full">
+                  <Image
+                    src={
+                      user?.profilImage
+                        ? user?.profilImage
+                        : `/assets/images/avatar_icon.png`
+                    }
+                    width={30}
+                    height={30}
+                    alt="avatar"
+                    className="rounded-full w-8 h-8"
+                  />
+                  <div className="ml-2">
+                    <p className="text-sm font-medium">{user.fullName}</p>
+                    <p
+                      className={`text-xs font-bold ${
+                        onlineUsers.includes(user._id)
+                          ? "text-green-500"
+                          : "text-gray-300"
+                      }`}
+                    >
+                      {onlineUsers.includes(user._id)
+                        ? "🟢 online"
+                        : "⚪ offline"}
+                    </p>
+                  </div>
                 </div>
-              </div>
-              {unSeenMessages?.[user._id] && (
-                <span className="border text-white font-semibold w-5 h-5 bg-[#936eff] rounded-full text-sm text-center">
-                  {unSeenMessages[user._id]}
-                </span>
-              )}
-            </li>
-          );
-        })}
+                {unSeenMessages?.[user._id] && (
+                  <span className="border text-white font-semibold w-5 h-5 bg-[#936eff] rounded-full text-sm text-center">
+                    {unSeenMessages[user._id]}
+                  </span>
+                )}
+              </li>
+            ))
+        )}
       </ul>
     </div>
   );

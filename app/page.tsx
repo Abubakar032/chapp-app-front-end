@@ -15,6 +15,7 @@ import ProfileSidebar from "./components/ProfileSidebar";
 import ChatBox from "./components/ChatBox";
 import ProfileUpdate from "./components/ProfileUpdate";
 import socket from "@/utils/socket";
+import { MoonLoader } from "react-spinners";
 
 interface User {
   _id?: string;
@@ -34,6 +35,7 @@ export default function Dashboard() {
     {}
   );
   const [isSending, setIsSending] = useState(false);
+  const [isSeen, setIsSeen] = useState(false);
   const [isProfileUpdate, setProfileUpdate] = useState(0);
   const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -41,10 +43,13 @@ export default function Dashboard() {
   const [sendMessage] = useSendMessageMutation();
   const { data: userList, refetch: refetchUserList } = useGetUserQuery({});
   const { data: Profile, refetch: refetcProfile } = useGetProfileQuery({});
-  const { data: messageData, refetch } = useGetMessageQuery({
+  const {
+    data: messageData,
+    refetch,
+    isLoading: messageLoading,
+  } = useGetMessageQuery({
     id: selectedUser?._id,
   });
-
 
   useEffect(() => {
     if (messageData?.messages) {
@@ -155,34 +160,12 @@ export default function Dashboard() {
   }, []);
 
   useEffect(() => {
-    const handleUnseenUpdate = ({
-      senderId,
-      receiverId,
-    }: {
-      senderId: string;
-      receiverId: string;
-    }) => {
-      if (receiverId === Profile?.user?._id) {
-        setUnSeenMessages((prev) => ({
-          ...prev,
-          [senderId]: (prev[senderId] || 0) + 1,
-        }));
-      }
-    };
-
-    socket.on("unseen-message", handleUnseenUpdate);
-
-    return () => {
-      socket.off("unseen-message", handleUnseenUpdate);
-    };
-  }, [Profile?.user?._id, messages]);
-
-  useEffect(() => {
     const handleReceive = (msg: any) => {
       const isCurrentChat = msg.senderId === selectedUser?._id;
 
       if (isCurrentChat && msg.receiverId === Profile?.user?._id) {
         const seenMessage = { ...msg, seen: true };
+        setIsSeen(true);
 
         setMessages((prev) => [...prev, seenMessage]);
 
@@ -196,12 +179,6 @@ export default function Dashboard() {
           delete updated[msg.senderId];
           return updated;
         });
-      } else {
-        // Not the current chat: count as unseen
-        setUnSeenMessages((prev) => ({
-          ...prev,
-          [msg.senderId]: (prev[msg.senderId] || 0) + 1,
-        }));
       }
     };
 
@@ -220,10 +197,34 @@ export default function Dashboard() {
     });
 
     return () => {
+      setIsSeen(false);
       socket.off("receive-message", handleReceive);
       socket.off("message-sent", handleSent);
     };
   }, [Profile?.user?._id, selectedUser?._id]);
+
+  useEffect(() => {
+    const handleUnseenUpdate = ({
+      senderId,
+      receiverId,
+    }: {
+      senderId: string;
+      receiverId: string;
+    }) => {
+      if (receiverId === Profile?.user?._id && senderId !== selectedUser?._id) {
+        setUnSeenMessages((prev) => ({
+          ...prev,
+          [senderId]: (prev[senderId] || 0) + 1,
+        }));
+      }
+    };
+
+    socket.on("unseen-message", handleUnseenUpdate);
+
+    return () => {
+      socket.off("unseen-message", handleUnseenUpdate);
+    };
+  }, [Profile?.user?._id, messages]);
 
   useEffect(() => {
     if (selectedUser?._id && Profile?.user?._id) {
@@ -250,13 +251,6 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    if (userList?.unseenMessages) {
-      setUnSeenMessages(userList?.unseenMessages || {});
-    }
-
-    refetcProfile();
-    refetchUserList();
-
     socket.on("messages-seen", ({ by }) => {
       setMessages((prev) =>
         prev.map((msg) =>
@@ -268,6 +262,15 @@ export default function Dashboard() {
     return () => {
       socket.off("messages-seen");
     };
+  }, [messages, userList?.unseenMessages]);
+
+  useEffect(() => {
+    if (userList?.unseenMessages) {
+      setUnSeenMessages(userList?.unseenMessages || {});
+    }
+
+    refetcProfile();
+    refetchUserList();
   }, [userList?.unseenMessages]);
 
   useEffect(() => {
@@ -277,7 +280,9 @@ export default function Dashboard() {
   return (
     <div className="w-full h-screen flex items-center justify-center inset-0 z-0 bg-black/5 backdrop-blur-md">
       <div className="h-[80vh] w-[80vw] flex border-2 border-gray-600 shadow-md rounded-lg overflow-hidden">
-        <div className={`${selectedUser?._id ? "w-[25%]" :"w-[50%]" }  text-white`}>
+        <div
+          className={`${selectedUser?._id ? "w-[25%]" : "w-[50%]"}  text-white`}
+        >
           <UserSideBar
             userList={userList}
             setSelectedUser={setSelectedUser}
@@ -288,39 +293,49 @@ export default function Dashboard() {
             setProfileUpdate={setProfileUpdate}
           />
         </div>
-        <div className={`${selectedUser?._id ? "w-[50%]" :"w-[50%]" }  text-white`}>
+        <div
+          className={`${selectedUser?._id ? "w-[50%]" : "w-[50%]"}  text-white`}
+        >
           {isProfileUpdate === 0 ? (
-            <ChatBox
-              selectedUser={selectedUser}
-              handleSendMessage={handleSendMessage}
-              setText={setText}
-              text={text}
-              messages={messages}
-              currentUserId={Profile?.user?._id}
-              isSending={isSending}
-              handleTyping={handleTyping}
-              typing={typing}
-              setImageFile={setImageFile}
-              imageFile={imageFile}
-              onlineUsers={onlineUsers}
-              setProfileUpdate={setProfileUpdate}
-            />
+            <>
+              {messageLoading ? (
+                <>
+                  <div className=" w-full h-full flex items-center justify-center">
+                    <MoonLoader color="white" size={100} />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <ChatBox
+                    selectedUser={selectedUser}
+                    handleSendMessage={handleSendMessage}
+                    setText={setText}
+                    text={text}
+                    messages={messages}
+                    currentUserId={Profile?.user?._id}
+                    isSending={isSending}
+                    handleTyping={handleTyping}
+                    typing={typing}
+                    setImageFile={setImageFile}
+                    imageFile={imageFile}
+                    onlineUsers={onlineUsers}
+                    setProfileUpdate={setProfileUpdate}
+                  />
+                </>
+              )}
+            </>
           ) : (
-            <ProfileUpdate setProfileUpdate={setProfileUpdate} Profile={Profile}/>
+            <ProfileUpdate
+              setProfileUpdate={setProfileUpdate}
+              Profile={Profile}
+            />
           )}
         </div>
-        {
-          selectedUser?._id && (
-            <div className="w-[25%] text-white">
-              <ProfileSidebar
-                selectedUser={selectedUser}
-                messages={messages}
-
-              />
-            </div>
-          )
-        }
-
+        {selectedUser?._id && (
+          <div className="w-[25%] text-white">
+            <ProfileSidebar selectedUser={selectedUser} messages={messages} />
+          </div>
+        )}
       </div>
     </div>
   );
