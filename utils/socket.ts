@@ -1,6 +1,6 @@
 // utils/socket.ts
 import { io } from "socket.io-client";
-const SOCKET_URL =  process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:6363";
+const SOCKET_URL =  process.env.REACT_APP_BASE_URL || "http://localhost:6363";
 
 const socket = io(SOCKET_URL, {
   transports: ["websocket"],
