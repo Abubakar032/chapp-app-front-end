@@ -1,6 +1,6 @@
 // utils/socket.ts
 import { io } from "socket.io-client";
-const SOCKET_URL = "https://chat-app-server-4x0f.onrender.com";
+const SOCKET_URL =  process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:6363";
 
 const socket = io(SOCKET_URL, {
   transports: ["websocket"],
