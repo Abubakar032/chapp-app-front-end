@@ -2,22 +2,27 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import Cookies from "js-cookie";
-import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import socket from "@/utils/socket";
 import { toast } from "react-toastify";
+import { FaArrowLeft } from "react-icons/fa6";
 
 interface ProfileSidebarProps {
   selectedUser: any;
   messages: any;
+  setResponsiveTab?: any;
+  setMdResponsiveTab?: any;
 }
 
 const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
   selectedUser,
   messages,
+  setResponsiveTab,
+  setMdResponsiveTab,
 }) => {
   const [isLogout, setLogout] = useState(false);
   const router = useRouter();
+
   const handLogOut = (): void => {
     setLogout(true);
     Cookies.remove("token");
@@ -26,11 +31,26 @@ const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
       router.replace("/sign-in");
       toast.success("Logout Successfully");
       socket.disconnect();
-    }, 2000); // 2 seconds delay
+    }, 2000);
   };
 
   return (
-    <div className="w-full text-white  flex flex-col h-full bg-white/10  backdrop-blur-lg relative  ">
+    <div className="w-full text-white flex flex-col h-full bg-white/10 backdrop-blur-lg relative">
+      {/* Back button */}
+      <button
+        onClick={() => {
+          setResponsiveTab?.(1);
+          setMdResponsiveTab?.(0);
+        }}
+        className="text-gray-300 lg:hidden mb-10 cursor-pointer flex mx-5 mt-5 gap-2"
+      >
+        <p className="mt-1">
+          <FaArrowLeft />
+        </p>{" "}
+        Back
+      </button>
+
+      {/* User info */}
       <div className="flex flex-col items-center py-5 border-b border-gray-500">
         <Image
           src={
@@ -48,11 +68,16 @@ const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
           {selectedUser?.bio}
         </p>
       </div>
-      <div className=" mt-2 w-full ">
-        <p className="text-sm text-gray-300  mx-5">Media</p>
-        <div className=" flex  gap-2 flex-wrap overflow-y-auto AtScrollHide  h-[40vh] py-5 justify-center w-full  space-y-1  scrollbar-thin scrollbar-thumb-gray-700 ">
-          {messages.map((msg: any, index: number) => {
-            if (msg.image) {
+
+      {/* Media section */}
+      <div className="mt-2 w-full flex flex-col flex-grow">
+        <p className="text-sm text-gray-300 mx-5">Media</p>
+        <div className="flex gap-2 flex-wrap overflow-y-auto AtScrollHide  py-5  justify-center w-full scrollbar-thin scrollbar-thumb-gray-700 max-h-[50vh]  md:max-h-[40vh]">
+          {messages.filter((msg: any) => msg.image).length === 0 ? (
+            <p className="text-gray-400 text-center w-full">No media found</p>
+          ) : (
+            messages.map((msg: any, index: number) => {
+              if (!msg.image) return null;
               return (
                 <Image
                   key={index}
@@ -63,11 +88,12 @@ const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
                   className="rounded-lg w-[100px] h-[100px] object-cover cursor-pointer"
                 />
               );
-            }
-            return null;
-          })}
+            })
+          )}
         </div>
       </div>
+
+      {/* Logout button */}
       <div className="absolute w-[75%] bottom-5 left-1/2 -translate-x-1/2 flex items-center justify-center">
         <button
           onClick={handLogOut}

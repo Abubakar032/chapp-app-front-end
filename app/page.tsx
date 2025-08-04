@@ -35,8 +35,11 @@ export default function Dashboard() {
     {}
   );
   const [isSending, setIsSending] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [isSeen, setIsSeen] = useState(false);
   const [isProfileUpdate, setProfileUpdate] = useState(0);
+  const [isResponsiveTab, setResponsiveTab] = useState(0);
+  const [isMdResponsiveTab, setMdResponsiveTab] = useState(0);
   const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [typing, setTyping] = useState<string | null>(null);
@@ -277,34 +280,109 @@ export default function Dashboard() {
     refetch();
   }, [selectedUser?._id]);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        await refetch();
+      } catch (error) {
+        console.error("Error while fetching:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (selectedUser?._id) {
+      fetchData();
+    }
+  }, [selectedUser?._id]);
+
   return (
-    <div className="w-full h-screen flex items-center justify-center inset-0 z-0 bg-black/5 backdrop-blur-md">
-      <div className="h-[80vh] w-[80vw] flex border-2 border-gray-600 shadow-md rounded-lg overflow-hidden">
+    <div className="w-full h-screen  flex items-center justify-center inset-0 z-0 bg-black/5 backdrop-blur-md">
+      <div className="md:h-[80vh] w-full h-full lg:w-[80vw] md:w-[95vw] mx-auto   place-content-center  md:flex border-2 border-gray-600 shadow-md rounded-lg overflow-hidden">
         <div
-          className={`${selectedUser?._id ? "w-[25%]" : "w-[50%]"}  text-white`}
+          className={`${
+            selectedUser?._id
+              ? "lg:w-[25%] md:w-[30%] w-full mx-auto"
+              : " w-full mx-auto md:w-[50%] "
+          }  text-white h-full pt-3 md:pt-0`}
         >
-          <UserSideBar
-            userList={userList}
-            setSelectedUser={setSelectedUser}
-            selectedUser={selectedUser}
-            Profile={Profile}
-            onlineUsers={onlineUsers}
-            unSeenMessages={unSeenMessages}
-            setProfileUpdate={setProfileUpdate}
-          />
+          <div className=" w-full h-full hidden md:block">
+            <UserSideBar
+              userList={userList}
+              setSelectedUser={setSelectedUser}
+              selectedUser={selectedUser}
+              Profile={Profile}
+              onlineUsers={onlineUsers}
+              unSeenMessages={unSeenMessages}
+              setProfileUpdate={setProfileUpdate}
+              setMdResponsiveTab={setMdResponsiveTab}
+            />
+          </div>
+          <div className=" w-full h-full md:hidden">
+            {isResponsiveTab === 0 && (
+              <UserSideBar
+                userList={userList}
+                setSelectedUser={setSelectedUser}
+                selectedUser={selectedUser}
+                Profile={Profile}
+                onlineUsers={onlineUsers}
+                unSeenMessages={unSeenMessages}
+                setProfileUpdate={setProfileUpdate}
+                setResponsiveTab={setResponsiveTab}
+              />
+            )}
+            {isResponsiveTab === 1 && (
+              <>
+                {isProfileUpdate === 0 ? (
+                  <>
+                    <ChatBox
+                      selectedUser={selectedUser}
+                      handleSendMessage={handleSendMessage}
+                      setText={setText}
+                      text={text}
+                      messages={messages}
+                      currentUserId={Profile?.user?._id}
+                      isSending={isSending}
+                      handleTyping={handleTyping}
+                      typing={typing}
+                      setImageFile={setImageFile}
+                      imageFile={imageFile}
+                      onlineUsers={onlineUsers}
+                      setProfileUpdate={setProfileUpdate}
+                      setResponsiveTab={setResponsiveTab}
+                      setSelectedUser={setSelectedUser}
+                      isLoading={isLoading}
+                    />
+                  </>
+                ) : (
+                  <ProfileUpdate
+                    setProfileUpdate={setProfileUpdate}
+                    Profile={Profile}
+                    setResponsiveTab={setResponsiveTab}
+                    refetcProfile={refetcProfile}
+                  />
+                )}
+              </>
+            )}
+
+            {isResponsiveTab === 2 && (
+              <ProfileSidebar
+                selectedUser={selectedUser}
+                messages={messages}
+                setResponsiveTab={setResponsiveTab}
+              />
+            )}
+          </div>
         </div>
         <div
-          className={`${selectedUser?._id ? "w-[50%]" : "w-[50%]"}  text-white`}
+          className={`${
+            selectedUser?._id ? "lg:w-[50%] w-[70%]" : "w-[50%] "
+          }  text-white md:block hidden `}
         >
           {isProfileUpdate === 0 ? (
             <>
-              {messageLoading ? (
-                <>
-                  <div className=" w-full h-full flex items-center justify-center">
-                    <MoonLoader color="white" size={100} />
-                  </div>
-                </>
-              ) : (
+              {isMdResponsiveTab === 0 && (
                 <>
                   <ChatBox
                     selectedUser={selectedUser}
@@ -320,22 +398,36 @@ export default function Dashboard() {
                     imageFile={imageFile}
                     onlineUsers={onlineUsers}
                     setProfileUpdate={setProfileUpdate}
+                    isLoading={isLoading}
+                    setMdResponsiveTab={setMdResponsiveTab}
+
                   />
                 </>
+              )}
+              {isMdResponsiveTab === 1 && (
+                <ProfileSidebar
+                  selectedUser={selectedUser}
+                  messages={messages}
+                  setMdResponsiveTab={setMdResponsiveTab}
+                />
               )}
             </>
           ) : (
             <ProfileUpdate
               setProfileUpdate={setProfileUpdate}
               Profile={Profile}
+              refetcProfile={refetcProfile}
             />
           )}
         </div>
-        {selectedUser?._id && (
-          <div className="w-[25%] text-white">
-            <ProfileSidebar selectedUser={selectedUser} messages={messages} />
-          </div>
-        )}
+
+        <>
+          {selectedUser?._id && (
+            <div className=" text-white w-[25%]   mx-auto lg:block hidden">
+              <ProfileSidebar selectedUser={selectedUser} messages={messages} />
+            </div>
+          )}
+        </>
       </div>
     </div>
   );

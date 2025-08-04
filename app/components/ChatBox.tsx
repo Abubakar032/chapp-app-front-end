@@ -2,9 +2,10 @@
 
 import Image from "next/image";
 import React, { useEffect, useRef } from "react";
+import { FaArrowLeft } from "react-icons/fa";
 import { FaImage } from "react-icons/fa6";
 import { IoCloseCircle } from "react-icons/io5";
-import { BeatLoader, ClipLoader } from "react-spinners";
+import { BeatLoader, ClipLoader, MoonLoader } from "react-spinners";
 
 interface Message {
   senderId: string;
@@ -34,6 +35,10 @@ interface ChatBoxProps {
   imageFile?: any;
   onlineUsers: any;
   setProfileUpdate?: any;
+  setResponsiveTab?: any;
+  setSelectedUser?: any;
+  isLoading?: boolean;
+  setMdResponsiveTab?: any;
 }
 
 const ChatBox: React.FC<ChatBoxProps> = ({
@@ -49,7 +54,11 @@ const ChatBox: React.FC<ChatBoxProps> = ({
   imageFile,
   onlineUsers,
   setProfileUpdate,
+  setResponsiveTab,
   isSending = false,
+  setSelectedUser,
+  isLoading,
+  setMdResponsiveTab
 }) => {
   const isDisabled =
     (!text.trim() && !imageFile) || !selectedUser?._id || isSending;
@@ -66,22 +75,57 @@ const ChatBox: React.FC<ChatBoxProps> = ({
     <div className="flex-1 relative w-full text-white p-4 flex flex-col justify-between h-full">
       {/* Header */}
       <div className="flex justify-between pb-3 border-b-2 border-gray-600 px-2">
-        <div className="flex gap-2">
-          <Image
-            src={
-              selectedUser?.profilImage
-                ? selectedUser.profilImage
-                : "/assets/images/avatar_icon.png"
-            }
-            width={40}
-            height={40}
-            alt="avatar"
-            className="rounded-full w-10 h-10"
-          />
-          <h2 className="text-lg font-semibold mt-2 flex">
-            {selectedUser?.fullName || "Select a user"}{" "}
-            {onlineUsers.includes(selectedUser._id) ? "🟢" : "⚪"}
-          </h2>
+        <div className="flex ">
+          <button
+            onClick={() => {
+              setResponsiveTab?.(0);
+              setSelectedUser({});
+            }}
+            className=" gap-2  text-gray-300 cursor-pointer md:hidden flex"
+          >
+            <p className="mt-2">
+              <FaArrowLeft />
+            </p>{" "}
+          </button>
+          <div
+            className=" flex cursor-pointer md:hidden"
+            onClick={() => setResponsiveTab?.(2)}
+          >
+            <Image
+              src={
+                selectedUser?.profilImage
+                  ? selectedUser.profilImage
+                  : "/assets/images/avatar_icon.png"
+              }
+              width={40}
+              height={40}
+              alt="avatar"
+              className="rounded-full w-10 h-10 ml-2 md:ml-0"
+            />
+            <h2 className="text-lg font-semibold mt-2 ml-2 md:ml-2 flex">
+              {selectedUser?.fullName || "Select a user"}{" "}
+              {onlineUsers.includes(selectedUser._id) ? "🟢" : "⚪"}
+            </h2>
+          </div>
+          <div className="  cursor-pointer hidden md:block" onClick={() => setMdResponsiveTab?.(1)}>
+            <div className=" flex">
+              <Image
+                src={
+                  selectedUser?.profilImage
+                    ? selectedUser.profilImage
+                    : "/assets/images/avatar_icon.png"
+                }
+                width={40}
+                height={40}
+                alt="avatar"
+                className="rounded-full w-10 h-10 ml-2 md:ml-0"
+              />
+              <h2 className="text-lg font-semibold mt-2 ml-2 md:ml-2 flex">
+                {selectedUser?.fullName || "Select a user"}{" "}
+                {onlineUsers.includes(selectedUser._id) ? "🟢" : "⚪"}
+              </h2>
+            </div>
+          </div>
         </div>
         <Image
           src="/assets/images/help_icon.png"
@@ -93,71 +137,82 @@ const ChatBox: React.FC<ChatBoxProps> = ({
         />
       </div>
 
-      {/* Messages */}
       <div className="flex-1 overflow-y-auto AtScrollHide py-10 mt-4 space-y-2 px-1 scrollbar-thin scrollbar-thumb-gray-700">
-        {messages.length > 0 && selectedUser?._id ? (
+        {isLoading ? (
           <>
-            {messages.map((msg, idx) => {
-              const isSender = msg.senderId === currentUserId;
-              const isRelated =
-                (msg.senderId === currentUserId &&
-                  msg.receiverId === selectedUser._id) ||
-                (msg.receiverId === currentUserId &&
-                  msg.senderId === selectedUser._id);
-
-              if (!isRelated) return null;
-
-              const formattedTime = new Date(
-                msg.createdAt ?? ""
-              ).toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              });
-
-              return (
-                <div
-                  key={idx}
-                  className={`flex flex-col ${
-                    isSender ? "items-end" : "items-start"
-                  } mb-3`}
-                >
-                  <div
-                    className={`w-fit max-w-[70%] p-2 rounded-2xl ${
-                      isSender ? "bg-purple-600" : "bg-gray-700"
-                    }`}
-                  >
-                    {msg.text && <p>{msg.text}</p>}
-                    {msg.image && (
-                      <Image
-                        src={msg.image}
-                        alt="attachment"
-                        width={150}
-                        height={150}
-                        className="rounded-xl mt-2 w-[150px] h-[150px] object-cover"
-                      />
-                    )}
-                  </div>
-                  <span className="text-[10px] text-gray-400 mt-1 px-1">
-                    {formattedTime}
-                  </span>
-                </div>
-              );
-            })}
-
-            <div ref={endOfMessagesRef} />
+            <div className=" w-full h-full flex items-center justify-center">
+              <MoonLoader color="white" size={100} />
+            </div>
           </>
         ) : (
-          <div className=" grid place-items-center h-full">
-            {/* <div> */}
-            <Image
-              src="/assets/images/logo_icon.svg"
-              width={150}
-              height={150}
-              alt="logo"
-            />
-            <p className=" text-2xl font-semibold">Chat anytime, anywhere</p>
-            {/* </div> */}
-          </div>
+          <>
+            {messages.length > 0 && selectedUser?._id ? (
+              <>
+                {messages.map((msg, idx) => {
+                  const isSender = msg.senderId === currentUserId;
+                  const isRelated =
+                    (msg.senderId === currentUserId &&
+                      msg.receiverId === selectedUser._id) ||
+                    (msg.receiverId === currentUserId &&
+                      msg.senderId === selectedUser._id);
+
+                  if (!isRelated) return null;
+
+                  const formattedTime = new Date(
+                    msg.createdAt ?? ""
+                  ).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  });
+
+                  return (
+                    <div
+                      key={idx}
+                      className={`flex flex-col ${
+                        isSender ? "items-end" : "items-start"
+                      } mb-3`}
+                    >
+                      <div
+                        className={`w-fit max-w-[70%] p-2 rounded-2xl ${
+                          isSender ? "bg-purple-600" : "bg-gray-700"
+                        }`}
+                      >
+                        {msg.text && <p>{msg.text}</p>}
+                        {msg.image && (
+                          <Image
+                            src={msg.image}
+                            alt="attachment"
+                            width={150}
+                            height={150}
+                            className="rounded-xl mt-2 w-[150px] h-[150px] object-cover"
+                          />
+                        )}
+                      </div>
+                      <span className="text-[10px] text-gray-400 mt-1 px-1">
+                        {formattedTime}
+                      </span>
+                    </div>
+                  );
+                })}
+
+                <div ref={endOfMessagesRef} />
+              </>
+            ) : (
+              <div className=" grid place-items-center h-full">
+                {/* <div> */}
+                <Image
+                  src="/assets/images/logo_icon.svg"
+                  width={150}
+                  height={150}
+                  alt="logo"
+                />
+                <p className=" text-2xl font-semibold">
+                  Chat anytime, anywhere
+                </p>
+                {/* </div> */}
+              </div>
+            )}
+          </>
         )}
       </div>
 

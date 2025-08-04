@@ -6,7 +6,7 @@ import { useUpdateProfileMutation } from "../Redux/services/AuthApi";
 import { toast } from "react-toastify";
 import Image from "next/image";
 
-const ProfileUpdate = ({ setProfileUpdate, Profile }: any) => {
+const ProfileUpdate = ({ setProfileUpdate, Profile, setResponsiveTab, refetcProfile }: any) => {
   const [updateProfile] = useUpdateProfileMutation();
 
   const [profileImage, setProfileImage] = useState<string | null>(null);
@@ -52,7 +52,8 @@ const ProfileUpdate = ({ setProfileUpdate, Profile }: any) => {
 
       if (response?.data?.user) {
         toast.success("Profile updated successfully");
-        setProfileUpdate(0);
+        // setProfileUpdate(0);
+        refetcProfile(); // Refetch profile data
       } else {
         toast.error("Profile update failed");
       }
@@ -63,13 +64,24 @@ const ProfileUpdate = ({ setProfileUpdate, Profile }: any) => {
   };
 
   return (
-    <div className="w-full h-full p-6 rounded-lg shadow-md relative text-gray-300 overflow-y-auto AtScrollHide">
+    <div className="w-full h-full p-6 rounded-lg shadow-md relative text-gray-300 overflow-y-auto AtScrollHide ">
       {/* Back Button */}
+      <div className="md:block  hidden">
       <button
         onClick={() => setProfileUpdate(0)}
-        className="absolute gap-2 top-4 left-4 text-gray-300 cursor-pointer flex"
+        className="absolute gap-2 flex top-4 left-4 text-gray-300  cursor-pointer "
       >
-        <p className="mt-2">
+        <p className="mt-1">
+          <FaArrowLeft />
+        </p>{" "}
+        Back
+      </button>
+      </div>
+       <button
+        onClick={() => setResponsiveTab?.(0)}
+        className="absolute gap-2 top-4 left-4 text-gray-300 md:hidden cursor-pointer flex"
+      >
+        <p className="mt-1">
           <FaArrowLeft />
         </p>{" "}
         Back

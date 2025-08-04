@@ -7,6 +7,7 @@ import Cookies from "js-cookie";
 
 import socket from "@/utils/socket";
 import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 
 interface UserSideBarProps {
   setSelectedUser: any;
@@ -15,11 +16,14 @@ interface UserSideBarProps {
   onlineUsers: any;
   unSeenMessages?: any;
   setProfileUpdate?: any;
+  setResponsiveTab?: any;
+  setMdResponsiveTab?: any;
   userList: {
     users: Array<{
       fullName: string;
       profilImage?: string;
       _id?: string;
+      email?: string;
     }>;
     unseenMessages?: {
       [userId: string]: number;
@@ -34,10 +38,12 @@ const UserSideBar: React.FC<UserSideBarProps> = ({
   onlineUsers,
   unSeenMessages,
   setProfileUpdate,
+  setResponsiveTab,
+  setMdResponsiveTab,
 }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [logout, setLogout] = useState(false);
-  const [value, setValue] = useState(""); // Added state for input value
+  const [value, setValue] = useState(""); // search input state
   const hideMenuTimeout = useRef<NodeJS.Timeout | null>(null);
   const router = useRouter();
 
@@ -51,7 +57,7 @@ const UserSideBar: React.FC<UserSideBarProps> = ({
   const handleMouseLeave = () => {
     hideMenuTimeout.current = setTimeout(() => {
       setShowMenu(false);
-    }, 1000); // 2 seconds
+    }, 1000); // 1 second delay
   };
 
   const handLogOut = (): void => {
@@ -62,11 +68,12 @@ const UserSideBar: React.FC<UserSideBarProps> = ({
       socket.disconnect();
       setShowMenu(false);
       router.replace("/sign-in");
+      toast.success("Logout Successfully");
     }, 2000);
   };
 
   return (
-    <div className="w-full text-white p-4 z-10 border-gray-500 h-full bg-white/10 backdrop-blur-lg">
+    <div className="w-full text-white p-4 z-10 border-gray-500 h-full bg-white/10 backdrop-blur-lg flex flex-col">
       <div className="flex gap-4 justify-between">
         <div className="flex gap-2">
           <Image
@@ -93,6 +100,7 @@ const UserSideBar: React.FC<UserSideBarProps> = ({
                   setProfileUpdate?.(1);
                   setShowMenu(false);
                   setSelectedUser({});
+                  setResponsiveTab?.(1);
                 }}
                 className="w-full text-left px-4 py-2 hover:bg-gray-100 cursor-pointer"
               >
@@ -102,7 +110,7 @@ const UserSideBar: React.FC<UserSideBarProps> = ({
                 onClick={handLogOut}
                 className={`w-full text-left px-4 py-2 hover:bg-gray-100 cursor-pointer ${
                   logout ? "opacity-50 cursor-not-allowed" : ""
-                } `}
+                }`}
                 disabled={logout}
               >
                 Logout
@@ -121,7 +129,7 @@ const UserSideBar: React.FC<UserSideBarProps> = ({
         }}
       />
 
-      <ul className="space-y-2 overflow-y-auto AtScrollHide py-4 px-1 scrollbar-thin scrollbar-thumb-gray-700">
+      <ul className="flex-1 overflow-y-auto AtScrollHide py-4 pb-5 space-y-2 px-1 scrollbar-thin scrollbar-thumb-gray-700">
         {userList?.users.filter(
           (user: any) =>
             user.fullName.toLowerCase().includes(value.toLowerCase()) ||
@@ -140,10 +148,12 @@ const UserSideBar: React.FC<UserSideBarProps> = ({
                 key={index}
                 onClick={() => {
                   setSelectedUser(user);
-                  setProfileUpdate(0)
+                  setProfileUpdate?.(0);
+                  setResponsiveTab?.(1);
+                  setMdResponsiveTab?.(0);
                 }}
                 className={`flex items-center justify-between gap-2 p-2 hover:bg-white/30 rounded-2xl cursor-pointer ${
-                  unSeenMessages?.[user._id] ? "bg-white/5" : ""
+                  unSeenMessages?.[user._id] ? "" : ""
                 } ${
                   user?._id === selectedUser?._id
                     ? "bg-white/30 border-2 border-gray-400"
@@ -154,7 +164,7 @@ const UserSideBar: React.FC<UserSideBarProps> = ({
                   <Image
                     src={
                       user?.profilImage
-                        ? user?.profilImage
+                        ? user.profilImage
                         : `/assets/images/avatar_icon.png`
                     }
                     width={30}
