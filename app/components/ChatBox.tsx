@@ -5,7 +5,6 @@ import React, { useEffect, useRef } from "react";
 import { FaImage } from "react-icons/fa6";
 import { IoCloseCircle } from "react-icons/io5";
 import { BeatLoader, ClipLoader } from "react-spinners";
-import VideoCall from "./Call";
 
 interface Message {
   senderId: string;
@@ -84,7 +83,6 @@ const ChatBox: React.FC<ChatBoxProps> = ({
             {onlineUsers.includes(selectedUser._id) ? "🟢" : "⚪"}
           </h2>
         </div>
-        <div className=" flex items-center gap-2">
         <Image
           src="/assets/images/help_icon.png"
           width={20}
@@ -93,8 +91,6 @@ const ChatBox: React.FC<ChatBoxProps> = ({
           className="rounded-full mt-2 w-5 h-5 cursor-pointer"
           // onClick={() => setProfileUpdate(1)}
         />
-        <VideoCall currentUserId={currentUserId} selectedUserId={selectedUser?._id} />
-        </div>
       </div>
 
       {/* Messages */}
