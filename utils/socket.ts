@@ -1,7 +1,9 @@
 // utils/socket.ts
 import { io } from "socket.io-client";
 
-import { Base_Url } from "@/app/config/configUrl";
+
+export const Base_Url = "https://chat-app-server-4x0f.onrender.com";
+// export const Base_Url =  "http://localhost:6363/";
 
 
 const socket = io(Base_Url, {

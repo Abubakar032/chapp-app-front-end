@@ -1,4 +1,4 @@
-export const Base_Url = "https://chat-app-server-4x0f.onrender.com/" || "http://localhost:6363/";
+export const Base_Url = "https://chat-app-server-4x0f.onrender.com/";
 // export const Base_Url =  "http://localhost:6363/";
 
 // ################################# AUTH API #################################
