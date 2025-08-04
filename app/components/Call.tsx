@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import io, { Socket } from "socket.io-client";
 
-const SOCKET_SERVER_URL = "http://localhost:6363/";
+// const SOCKET_SERVER_URL = "http://localhost:6363/";
+const SOCKET_SERVER_URL = "https://chat-app-server-4x0f.onrender.com/";
 
 const VideoCall = ({ currentUserId, selectedUserId }: any) => {
   const [socket, setSocket] = useState<Socket | null>(null);
