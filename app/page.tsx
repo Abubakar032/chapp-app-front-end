@@ -298,14 +298,14 @@ export default function Dashboard() {
   }, [selectedUser?._id]);
 
   return (
-    <div className="w-full h-screen  flex items-center justify-center inset-0 z-0 bg-black/5 backdrop-blur-md">
-      <div className="md:h-[80vh] w-full h-full lg:w-[80vw] md:w-[95vw] mx-auto   place-content-center  md:flex border-2 border-gray-600 shadow-md rounded-lg overflow-hidden">
+    <div className="w-full h-screen  flex items-center justify-center inset-0 z-0  bg-black/5 backdrop-blur-md">
+      <div className="md:h-[80vh]  w-full h-full lg:w-[80vw] md:w-[95vw] mx-auto   place-content-center  md:flex border-2 border-gray-600 shadow-md rounded-lg overflow-hidden">
         <div
           className={`${
             selectedUser?._id
               ? "lg:w-[25%] md:w-[30%] w-full mx-auto"
               : " w-full mx-auto md:w-[50%] "
-          }  text-white h-full pt-3 md:pt-0`}
+          }  text-white h-full `}
         >
           <div className=" w-full h-full hidden md:block">
             <UserSideBar
@@ -319,7 +319,7 @@ export default function Dashboard() {
               setMdResponsiveTab={setMdResponsiveTab}
             />
           </div>
-          <div className=" w-full h-full md:hidden">
+          <div className=" w-full h-full md:hidden ">
             {isResponsiveTab === 0 && (
               <UserSideBar
                 userList={userList}
