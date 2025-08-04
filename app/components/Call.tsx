@@ -14,7 +14,6 @@ const VideoCall = ({ currentUserId, selectedUserId }: any) => {
   const [inCall, setInCall] = useState(false);
   const [calling, setCalling] = useState(false);
   const [calleeId, setCalleeId] = useState<string | null>(null);
-
   const iceServers = {
     iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
   };
