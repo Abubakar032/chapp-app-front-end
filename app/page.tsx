@@ -44,7 +44,7 @@ export default function Dashboard() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [typing, setTyping] = useState<string | null>(null);
   const [sendMessage] = useSendMessageMutation();
-  const { data: userList, refetch: refetchUserList } = useGetUserQuery({});
+  const { data: userList, refetch: refetchUserList, isLoading:userLoding } = useGetUserQuery({});
   const { data: Profile, refetch: refetcProfile } = useGetProfileQuery({});
   const {
     data: messageData,
@@ -317,6 +317,7 @@ export default function Dashboard() {
               unSeenMessages={unSeenMessages}
               setProfileUpdate={setProfileUpdate}
               setMdResponsiveTab={setMdResponsiveTab}
+              userLoding={userLoding}
             />
           </div>
           <div className=" w-full h-full md:hidden ">
@@ -330,6 +331,7 @@ export default function Dashboard() {
                 unSeenMessages={unSeenMessages}
                 setProfileUpdate={setProfileUpdate}
                 setResponsiveTab={setResponsiveTab}
+                userLoding={userLoding}
               />
             )}
             {isResponsiveTab === 1 && (
@@ -400,7 +402,6 @@ export default function Dashboard() {
                     setProfileUpdate={setProfileUpdate}
                     isLoading={isLoading}
                     setMdResponsiveTab={setMdResponsiveTab}
-
                   />
                 </>
               )}
